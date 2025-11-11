@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chellow — Varsha</title>
+  <style>
+    :root{
+      --bg1:#0f1724;
+      --bg2:#0b2238;
+      --accent:#ffd6e0;
+      --muted:#bfcdd6;
+      --glass: rgba(255,255,255,0.06);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: radial-gradient(1200px 600px at 10% 20%, rgba(255,218,236,0.04), transparent 10%),
+                  linear-gradient(180deg,var(--bg1) 0%, var(--bg2) 100%);
+      color:var(--muted);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:32px;
+      overflow:hidden;
+    }
+
+    .card{
+      width:min(920px,96vw);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:20px;
+      padding:48px;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+      position:relative;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,0.04);
+      backdrop-filter: blur(6px) saturate(120%);
+    }
+
+    h1{
+      margin:0 0 12px 0;
+      font-size: clamp(28px, 4.5vw, 48px);
+      color: white;
+      letter-spacing: 0.4px;
+      font-weight:700;
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .hearts{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      margin-left:6px;
+    }
+
+    .heart{
+      width:28px;height:28px;
+      display:inline-grid;place-items:center;
+      transform-origin:center;
+      animation:float 4s ease-in-out infinite;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5));
+    }
+    .heart:nth-child(2){animation-delay:0.3s}
+    .heart:nth-child(3){animation-delay:0.6s}
+
+    @keyframes float{
+      0%{ transform: translateY(0) scale(1) }
+      50%{ transform: translateY(-10px) scale(1.06) }
+      100%{ transform: translateY(0) scale(1) }
+    }
+
+    .moon{
+      position:absolute;right:-80px;top:-60px;width:360px;height:360px;border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.06), rgba(255,255,255,0.02) 15%, transparent 60%),
+                  linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      opacity:0.9;transform:rotate(18deg);
+      pointer-events:none;
+    }
+
+    .stars{
+      position:absolute;left:20px;top:10px;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.12);
+      box-shadow: 30px 20px rgba(255,255,255,0.06), 140px 30px rgba(255,255,255,0.08), 220px 80px rgba(255,255,255,0.04),
+                  320px 180px rgba(255,255,255,0.05), 50px 140px rgba(255,255,255,0.05), 10px 200px rgba(255,255,255,0.03);
+      opacity:0.9;filter:blur(0.2px);
+      pointer-events:none;
+    }
+
+    .message{
+      font-size:18px;line-height:1.6;color:var(--muted);
+      max-width:60ch;margin-top:18px;
+    }
+
+    .footer{
+      margin-top:28px;display:flex;gap:12px;align-items:center;
+    }
+
+    .btn{
+      background: linear-gradient(90deg, rgba(255,214,230,0.07), rgba(255,255,255,0.02));
+      border:1px solid rgba(255,255,255,0.04);
+      padding:10px 16px;border-radius:12px;color:var(--accent);
+      cursor:pointer;font-weight:600;font-size:14px;backdrop-filter: blur(4px);
+    }
+
+    .confetti-area{position:absolute;inset:0;pointer-events:none}
+    .confetti{position:absolute;width:14px;height:14px;opacity:0;transform:translateY(0) rotate(0);}
+    .confetti svg{display:block;width:100%;height:100%}
+
+    @media (max-width:520px){
+      .card{padding:28px;border-radius:16px}
+      h1{font-size:28px}
+    }
+  </style>
+</head>
+<body>
+  <div class="card" role="main" aria-labelledby="title">
+    <div class="moon" aria-hidden="true"></div>
+    <div class="stars" aria-hidden="true"></div>
+
+    <h1 id="title">
+      Varsha Chellow
+      <span class="hearts" aria-hidden="true">
+        <span class="heart">❤️</span>
+        <span class="heart">💗</span>
+        <span class="heart">💕</span>
+      </span>
+    </h1>
+
+    <p class="subtitle">A quiet corner of the web — made with a soft heart and gentle moonlight.</p>
+
+    <p class="message">May the nights be calm and your dreams tender. Thinking of you, Varsha — sending tiny hearts and warm wishes across this little page.</p>
+
+    <div class="footer">
+      <button class="btn" id="sendHeart">Send a Heart</button>
+      <button class="btn" id="toggleTheme">Toggle Glow</button>
+    </div>
+
+    <div class="confetti-area" id="confetti"></div>
+  </div>
+
+  <script>
+    const confettiArea = document.getElementById('confetti');
+    const sendBtn = document.getElementById('sendHeart');
+    const toggleBtn = document.getElementById('toggleTheme');
+
+    function makeHeart(x,y){
+      const el = document.createElement('div');
+      el.className = 'confetti';
+      el.style.left = (x + Math.random()*80 - 40) + 'px';
+      el.style.top = (y + Math.random()*30 - 10) + 'px';
+      el.style.opacity = 1;
+      el.style.transform = `translateY(0) rotate(${Math.random()*40-20}deg)`;
+      el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21s-7-4.35-9-7.5C-0.5 9.5 3 4 7 5.5 9 6.5 10.2 8.2 12 10c1.8-1.8 3-3.5 5-4.5 4-1.5 7.5 4 4 8.5-2 3-9 7.5-9 7.5z" fill="#ffb3c6"/></svg>`;
+      confettiArea.appendChild(el);
+
+      const duration = 2200 + Math.random()*1200;
+      el.animate([
+        { transform: el.style.transform + ' translateY(0) scale(0.9)', opacity:1 },
+        { transform: `translateY(-140px) translateX(${Math.random()*80-40}px) rotate(${Math.random()*360}deg) scale(0.6)`, opacity:0 }
+      ], { duration, easing:'cubic-bezier(.2,.8,.2,1)' });
+
+      setTimeout(()=> el.remove(), duration+50);
+    }
+
+    function floatHearts(){
+      const rect = confettiArea.getBoundingClientRect();
+      for(let i=0;i<15;i++){
+        makeHeart(rect.width/2 + (Math.random()*200-100), rect.height/2 + 50);
+      }
+    }
+
+    sendBtn.addEventListener('click', floatHearts);
+
+    let glow=false;
+    toggleBtn.addEventListener('click', ()=>{
+      document.body.style.background = glow ?
+        'radial-gradient(1200px 600px at 10% 20%, rgba(255,218,236,0.04), transparent 10%), linear-gradient(180deg,var(--bg1) 0%, var(--bg2) 100%)'
+        : 'radial-gradient(1400px 700px at 10% 20%, rgba(255,230,230,0.06), transparent 10%), linear-gradient(180deg,#08101b 0%, #062433 100%)';
+      glow = !glow;
+    });
+
+    // auto float hearts on page load
+    window.addEventListener('load', ()=>{
+      setTimeout(floatHearts, 800);
+    });
+  </script>
+</body>
+</html>
